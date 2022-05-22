@@ -12,6 +12,8 @@ using namespace std;
 #define MIN_X -5
 #define MIN_Y -5
 #define MAX_ITERATIONS_N 10000
+#define OUTPUT_ROWS_N 1000
+#define OUTPUT_COLS_N 1000
 
 struct Sample {
   double x = 0.0;
@@ -85,6 +87,32 @@ int getErrorCount(const BoostingClassifier& boostingClassifier) {
   return errorCount;
 }
 
+void output(const BoostingClassifier& boostingClassifier) {
+  double xMin = INT_MAX;
+  double xMax = INT_MIN;
+  double yMin = INT_MAX;
+  double yMax = INT_MIN;
+  for (int i = 0; i < samples.size(); ++i) {
+    if (samples[i].x < xMin) xMin = samples[i].x;
+    if (samples[i].x > xMax) xMax = samples[i].x;
+    if (samples[i].y < yMin) yMin = samples[i].y;
+    if (samples[i].y > yMax) yMax = samples[i].y;
+  }
+  xMin -= 1;
+  xMax += 1;
+  yMin -= 1;
+  yMax += 1;
+  vector<double> ys(OUTPUT_ROWS_N);
+  for (int i = 0; i < OUTPUT_ROWS_N; ++i) ys[i] = yMin + (yMax - yMin) * i / (OUTPUT_ROWS_N - 1.0);
+  vector<double> xs(OUTPUT_COLS_N);
+  for (int i = 0; i < OUTPUT_COLS_N; ++i) xs[i] = xMin + (xMax - xMin) * i / (OUTPUT_COLS_N - 1.0);
+  freopen("f.txt", "w", stdout);
+  for (int i = 0; i < OUTPUT_ROWS_N; ++i) {
+    for (int j = 0; j < OUTPUT_COLS_N; ++j) printf("%f ", boostingClassifier.value(xs[j], ys[i]));
+    printf("\n");
+  }
+}
+
 void deleteClassifiers() {
   for (int i = 0; i < classifierPtrs.size(); ++i) delete classifierPtrs[i];
 }
@@ -116,6 +144,7 @@ int main() {
     ++m;
   }
   printf("step indexed #%d: error rate = %d/%d, classifiers count = %d\n", m, getErrorCount(boostingClassifier), samples.size(), boostingClassifier.getClassifiersCount());
+  output(boostingClassifier);
   deleteClassifiers();
   return 0;
 }
