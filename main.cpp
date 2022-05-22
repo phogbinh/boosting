@@ -137,7 +137,8 @@ int main() {
     Classifier* classifierPtr;
     double error;
     getMinErrorClassifierPtr(classifierPtr, error);
-    boostingClassifier.add(classifierPtr, log(1.0 / error - 1.0) / 2.0);
+    if (error == 0.0) boostingClassifier.add(classifierPtr, 1.0);
+    else boostingClassifier.add(classifierPtr, log(1.0 / error - 1.0) / 2.0);
     if (getErrorCount(boostingClassifier) == 0) break;
     if (m == MAX_ITERATIONS_N - 1) break;
     updateWeights(classifierPtr, error);
