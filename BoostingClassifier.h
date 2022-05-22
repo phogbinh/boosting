@@ -4,12 +4,12 @@ public:
     if (_map.find(classifierPtr) == _map.end()) _map[classifierPtr] = alpha;
     else _map[classifierPtr] += alpha;
   }
-  double value(double x, double y) {
+  double value(double x, double y) const {
     double weightedSum = 0.0;
     for (auto& element : _map) weightedSum += element.second * element.first->classify(x, y);
     return weightedSum;
   }
-  int classify(double x, double y) {
+  int classify(double x, double y) const {
     return value(x, y) >= 0.0 ? 1 : -1;
   }
   int getClassifiersCount() {

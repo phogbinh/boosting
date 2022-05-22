@@ -3,6 +3,7 @@
 #include "XMoreEqlClassifier.h"
 #include "YLessClassifier.h"
 #include "YMoreEqlClassifier.h"
+#include "BoostingClassifier.h"
 
 using namespace std;
 
@@ -10,6 +11,7 @@ using namespace std;
 #define MAX_DOUBLE_DIGITS_N 20
 #define MIN_X -5
 #define MIN_Y -5
+#define MAX_ITERATIONS_N 10000
 
 struct Sample {
   double x = 0.0;
@@ -50,6 +52,39 @@ void constructDecisionTreeStumps() {
   }
 }
 
+double getError(Classifier* classifierPtr) {
+  double error = 0.0;
+  for (int i = 0; i < samples.size(); ++i)
+    if (classifierPtr->classify(samples[i].x, samples[i].y) != samples[i].r) error += weights[i];
+  return error;
+}
+
+void getMinErrorClassifierPtr(Classifier*& minErrorClassifierPtr, double& minError) {
+  minErrorClassifierPtr = nullptr;
+  minError = INT_MAX;
+  for (Classifier* classifierPtr : classifierPtrs) {
+    double error = getError(classifierPtr);
+    if (error < minError) {
+      minErrorClassifierPtr = classifierPtr;
+      minError = error;
+    }
+  }
+}
+
+void updateWeights(Classifier* classifierPtr, double error) {
+  for (int i = 0; i < samples.size(); ++i) {
+    if (classifierPtr->classify(samples[i].x, samples[i].y) == samples[i].r) weights[i] /= 2.0 * (1.0 - error);
+    else weights[i] /= 2.0 * error;
+  }
+}
+
+int getErrorCount(const BoostingClassifier& boostingClassifier) {
+  int errorCount = 0;
+  for (int i = 0; i < samples.size(); ++i)
+    if (boostingClassifier.classify(samples[i].x, samples[i].y) != samples[i].r) ++errorCount;
+  return errorCount;
+}
+
 void deleteClassifiers() {
   for (int i = 0; i < classifierPtrs.size(); ++i) delete classifierPtrs[i];
 }
@@ -68,6 +103,19 @@ int main() {
   }
   constructDecisionTreeStumps();
   weights.resize(samples.size(), 1.0 / (double)samples.size());
+  BoostingClassifier boostingClassifier;
+  int m = 0;
+  while (true) {
+    Classifier* classifierPtr;
+    double error;
+    getMinErrorClassifierPtr(classifierPtr, error);
+    boostingClassifier.add(classifierPtr, log(1.0 / error - 1.0) / 2.0);
+    if (getErrorCount(boostingClassifier) == 0) break;
+    if (m == MAX_ITERATIONS_N - 1) break;
+    updateWeights(classifierPtr, error);
+    ++m;
+  }
+  printf("step indexed #%d: error rate = %d/%d, classifiers count = %d\n", m, getErrorCount(boostingClassifier), samples.size(), boostingClassifier.getClassifiersCount());
   deleteClassifiers();
   return 0;
 }
