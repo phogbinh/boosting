@@ -18,6 +18,7 @@ struct Sample {
 };
 
 vector<Sample> samples;
+vector<double> weights;
 vector<Classifier*> classifierPtrs;
 
 void constructDecisionTreeStumps() {
@@ -66,6 +67,7 @@ int main() {
     samples.push_back(sample);
   }
   constructDecisionTreeStumps();
+  weights.resize(samples.size(), 1.0 / (double)samples.size());
   deleteClassifiers();
   return 0;
 }
