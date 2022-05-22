@@ -49,6 +49,10 @@ void constructDecisionTreeStumps() {
   }
 }
 
+void deleteClassifiers() {
+  for (int i = 0; i < classifierPtrs.size(); ++i) delete classifierPtrs[i];
+}
+
 int main() {
   freopen(DATA_FILENAME, "r", stdin);
   char strX[MAX_DOUBLE_DIGITS_N];
@@ -62,5 +66,6 @@ int main() {
     samples.push_back(sample);
   }
   constructDecisionTreeStumps();
+  deleteClassifiers();
   return 0;
 }
