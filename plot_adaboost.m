@@ -1,4 +1,4 @@
-train_data = readmatrix("data.txt");
+train_data = readmatrix("data/basic.txt");
 train_data_N = numel( train_data(:, 1) );
 
 train_pos = zeros(train_data_N, 2);

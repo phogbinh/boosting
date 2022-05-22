@@ -7,7 +7,7 @@
 
 using namespace std;
 
-#define DATA_FILENAME "data.txt"
+#define DATA_FILENAME "data/basic.txt"
 #define MAX_DOUBLE_DIGITS_N 20
 #define MIN_X -5
 #define MIN_Y -5
